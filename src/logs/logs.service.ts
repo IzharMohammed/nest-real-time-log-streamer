@@ -3,28 +3,40 @@ import { CreateLogDto } from './dto/create-log.dto';
 import { UpdateLogDto } from './dto/update-log.dto';
 import * as schema from "../database/schema"
 import { DrizzleService } from 'src/database/drizzle.service';
+import { Subject } from 'rxjs';
+import { LogInsert } from './logs.types';
 
 @Injectable()
 export class LogsService {
   constructor(private readonly drizzle: DrizzleService) { }
+  private logStream = new Subject<any>();
 
-  create(createLogDto: CreateLogDto) {
-    return 'This action adds a new log';
+  async create(createLogDto: CreateLogDto) {
+    const log: LogInsert = {
+      message: createLogDto.message,
+      level: createLogDto.level
+    }
+
+    const inserted = await this.drizzle.db.insert(schema.logs).values(log).returning();
+
+    // push to stream
+    this.logStream.next(inserted[0])
+
+    return inserted[0];
   }
 
-  async findAll() {
-    return await this.drizzle.db.select().from(schema.users)
+  getLogStream() {
+    return this.logStream.asObservable();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} log`;
-  }
+  async onModuleInit() {
+    setInterval(async () => {
+      const fakeLog: LogInsert = {
+        message: `Fake Log ${Math.random()}`,
+        level: 'info'
+      }
 
-  update(id: number, updateLogDto: UpdateLogDto) {
-    return `This action updates a #${id} log`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} log`;
+      await this.create(fakeLog)
+    }, 2000)
   }
 }
