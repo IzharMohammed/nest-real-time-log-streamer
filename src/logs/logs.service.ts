@@ -1,20 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateLogDto } from './dto/create-log.dto';
 import { UpdateLogDto } from './dto/update-log.dto';
+import * as schema from "../database/schema"
+import { DrizzleService } from 'src/database/drizzle.service';
 
 @Injectable()
 export class LogsService {
-  constructor(
-    @Inject("DRIZZLE_CONNECTION")
-    private readonly db: any
-  ) { }
-  
+  constructor(private readonly drizzle: DrizzleService) { }
+
   create(createLogDto: CreateLogDto) {
     return 'This action adds a new log';
   }
 
-  findAll() {
-    return `This action returns all logs`;
+  async findAll() {
+    return await this.drizzle.db.select().from(schema.users)
   }
 
   findOne(id: number) {
