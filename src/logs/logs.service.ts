@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateLogDto } from './dto/create-log.dto';
 import { UpdateLogDto } from './dto/update-log.dto';
 
 @Injectable()
 export class LogsService {
+  constructor(
+    @Inject("DRIZZLE_CONNECTION")
+    private readonly db: any
+  ) { }
+  
   create(createLogDto: CreateLogDto) {
     return 'This action adds a new log';
   }
