@@ -11,5 +11,6 @@ export default {
         user: 'postgres',
         password: 'postgres',
         database: 'nest_real_time_log_streamer',
+        ssl: false
     },
 } satisfies Config;
